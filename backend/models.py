@@ -50,7 +50,7 @@ class House(Base):
     price            = Column(Float, nullable=False)
     value            = Column(Float, nullable=False)
     appreciation_rate = Column(Float, default=0.0021)
-    metadata         = Column(JSON, default=dict)
+    rent_metadata    = Column(JSON, default=dict)
 
     portfolio = relationship("Portfolio", back_populates="houses")
 

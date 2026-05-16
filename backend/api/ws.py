@@ -39,7 +39,7 @@ def _load(db: Session, portfolio_id: int, user_id: int) -> tuple[PortfolioModel,
         house.price            = h.price
         house.value            = h.value
         house.appreciation_rate = h.appreciation_rate
-        house.metadata         = h.metadata or {}
+        house.metadata         = h.rent_metadata or {}
         p.houses.append(house)
 
     for l in db_p.loans:
@@ -82,7 +82,7 @@ def _save(db: Session, db_p: PortfolioModel, p: Portfolio):
                 price=h.price,
                 value=h.value,
                 appreciation_rate=h.appreciation_rate,
-                metadata=h.metadata,
+                rent_metadata=h.metadata,
             ))
 
     # Sync loans
