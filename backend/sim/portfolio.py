@@ -10,7 +10,7 @@ class Portfolio:
         name: str,
         world: World,
         life: int = 120,
-        loan_repay_rate: float = 1.0,
+        loan_repay_rate: float = 0.0,
     ):
         self.name = name
         self.world = world

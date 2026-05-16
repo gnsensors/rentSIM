@@ -64,8 +64,10 @@ export default function PortfolioControls({ state, month, connected, onStep, onI
           <span className="tabular text-gray-300">{fmt(state.invested)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-sm text-gray-400">Inflation</span>
-          <span className="tabular text-gray-300">{((state.inflation - 1) * 100).toFixed(2)}%</span>
+          <span className="text-sm text-gray-400">Price level</span>
+          <span className="tabular text-gray-300" title="Cumulative price multiplier since month 0">
+            ×{state.inflation.toFixed(3)}
+          </span>
         </div>
       </div>
 

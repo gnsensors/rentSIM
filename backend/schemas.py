@@ -24,7 +24,7 @@ class Token(BaseModel):
 class PortfolioCreate(BaseModel):
     name: str
     life: int = 120
-    loan_repay_rate: float = 1.0
+    loan_repay_rate: float = 0.0
 
 
 class PortfolioResponse(BaseModel):
