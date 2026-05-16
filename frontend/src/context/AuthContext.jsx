@@ -16,16 +16,20 @@ export function AuthProvider({ children }) {
   }, [])
 
   const doRefresh = useCallback(async () => {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
     try {
-      const res = await fetch(`${API}/api/auth/refresh`, { method: 'POST', credentials: 'include' })
+      const res = await fetch(`${API}/api/auth/refresh`, { method: 'POST', credentials: 'include', signal: controller.signal })
       if (!res.ok) { setUser(null); setToken(null); return }
       const data = await res.json()
       setToken(data.access_token)
       setUser(data.user)
-      scheduleRefresh(13 * 60 * 1000) // refresh 2 min before 15-min expiry
+      scheduleRefresh(13 * 60 * 1000)
     } catch {
       setUser(null)
       setToken(null)
+    } finally {
+      clearTimeout(timeout)
     }
   }, [scheduleRefresh])
 

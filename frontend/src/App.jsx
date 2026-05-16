@@ -15,10 +15,14 @@ function Dashboard() {
   const [creating, setCreating]         = useState(false)
 
   async function load() {
-    const res = await fetch(`${API}/api/portfolios`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    if (res.ok) setPortfolios(await res.json())
+    try {
+      const res = await fetch(`${API}/api/portfolios`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.ok) setPortfolios(await res.json())
+    } catch (e) {
+      console.error('Failed to load portfolios:', e)
+    }
   }
 
   useEffect(() => { load() }, [token])
@@ -100,7 +104,11 @@ function Dashboard() {
 
 function RequireAuth({ children }) {
   const { user, ready } = useAuth()
-  if (!ready) return null
+  if (!ready) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-950">
+      <div className="text-gray-500 text-sm animate-pulse">Loading…</div>
+    </div>
+  )
   return user ? children : <Navigate to="/login" replace />
 }
 
