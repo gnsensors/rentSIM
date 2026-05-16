@@ -33,13 +33,14 @@ class Portfolio:
         self.invested += amount
         return {"type": "invested", "amount": round(amount, 2), "total_cash": round(self.cash, 2)}
 
-    def take_loan(self, amount: float, rate: float = 0.06, years: float = None) -> tuple[Loan, dict]:
+    def take_loan(self, amount: float, rate: float = 0.06, years: float = None, cash_advance: bool = True) -> tuple[Loan, dict]:
         if years is None:
             years = self.life / 12
         loan = Loan(id=self._next_loan_id, amount=amount, rate=rate, years=years)
         self._next_loan_id += 1
         self.loans.append(loan)
-        self.cash += amount
+        if cash_advance:
+            self.cash += amount
         return loan, {
             "type": "loan_taken",
             "loan_id": loan.id,
@@ -64,7 +65,7 @@ class Portfolio:
         events = [{"type": "house_bought", "house_id": house.id, "price": round(full_price, 2), "down_payment": round(down_payment, 2)}]
 
         if loan_amount > 0:
-            _, loan_event = self.take_loan(loan_amount)
+            _, loan_event = self.take_loan(loan_amount, cash_advance=False)
             events.append(loan_event)
 
         return events
