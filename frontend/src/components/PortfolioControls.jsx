@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 const fmt  = (n) => '$' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 })
 const pct  = (n) => Number(n).toFixed(2) + '%'
@@ -9,15 +9,15 @@ export default function PortfolioControls({ state, month, connected, onStep, onI
   const [autoBuy, setAutoBuy]       = useState(state?.auto_buy_threshold ?? '')
   const [autoStep, setAutoStep]     = useState(false)
   const [stepMs, setStepMs]         = useState(1000)
-  const timerRef = useState(null)
+  const timerRef = useRef(null)
 
   function toggleAuto() {
     if (autoStep) {
-      clearInterval(timerRef[0])
-      timerRef[0] = null
+      clearInterval(timerRef.current)
+      timerRef.current = null
       setAutoStep(false)
     } else {
-      timerRef[0] = setInterval(onStep, stepMs)
+      timerRef.current = setInterval(onStep, stepMs)
       setAutoStep(true)
     }
   }
