@@ -7,21 +7,41 @@ import PortfolioCard from './components/PortfolioCard'
 
 const API = window.__API_URL__ || import.meta.env.VITE_API_URL || ''
 
+async function apiFetch(url, options = {}) {
+  console.log(`[API] ${options.method || 'GET'} ${url}`)
+  try {
+    const res = await fetch(url, options)
+    console.log(`[API] ${res.status} ${url}`)
+    if (!res.ok) {
+      const text = await res.text()
+      console.error(`[API] Error body:`, text)
+      throw new Error(`${res.status}: ${text}`)
+    }
+    return res
+  } catch (e) {
+    console.error(`[API] Failed: ${url}`, e)
+    throw e
+  }
+}
+
 function Dashboard() {
   const { token, user, logout }         = useAuth()
   const navigate                        = useNavigate()
   const [portfolios, setPortfolios]     = useState([])
+  const [loadError, setLoadError]       = useState('')
   const [newName, setNewName]           = useState('')
   const [creating, setCreating]         = useState(false)
 
   async function load() {
+    if (!token) return
+    setLoadError('')
     try {
-      const res = await fetch(`${API}/api/portfolios`, {
+      const res = await apiFetch(`${API}/api/portfolios`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      if (res.ok) setPortfolios(await res.json())
+      setPortfolios(await res.json())
     } catch (e) {
-      console.error('Failed to load portfolios:', e)
+      setLoadError(e.message)
     }
   }
 
@@ -87,7 +107,13 @@ function Dashboard() {
           </button>
         </form>
 
-        {portfolios.length === 0 && (
+        {loadError && (
+          <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-3 text-red-300 text-sm">
+            Failed to load portfolios: {loadError}
+          </div>
+        )}
+
+        {portfolios.length === 0 && !loadError && (
           <div className="text-center py-24 text-gray-500">
             <p className="text-lg">No portfolios yet.</p>
             <p className="text-sm mt-1">Create one above to start simulating.</p>
