@@ -5,7 +5,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import PortfolioCard from './components/PortfolioCard'
 
-const API = import.meta.env.VITE_API_URL || ''
+const API = window.__API_URL__ || import.meta.env.VITE_API_URL || ''
 
 function Dashboard() {
   const { token, user, logout }         = useAuth()

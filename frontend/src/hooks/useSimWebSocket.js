@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 
-const WS_BASE = import.meta.env.VITE_WS_URL || (
-  typeof window !== 'undefined'
-    ? (window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host
-    : 'ws://localhost:8000'
+const WS_BASE = window.__WS_URL__ || import.meta.env.VITE_WS_URL || (
+  (window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host
 )
 
 export function useSimWebSocket(portfolioId) {
