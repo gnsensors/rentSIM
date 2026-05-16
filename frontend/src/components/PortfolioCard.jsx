@@ -29,6 +29,8 @@ export default function PortfolioCard({ portfolio, onDelete }) {
   const handleInvest      = (amt) => send({ action: 'invest', amount: amt })
   const handleBuy         = (price) => send({ action: 'buy_house', price })
   const handleSell        = (id)  => send({ action: 'sell_house', house_id: id })
+  const handleRemoveHouse = (id)  => send({ action: 'delete_house', house_id: id })
+  const handleRemoveLoan  = (id)  => send({ action: 'delete_loan',  loan_id: id })
   const handleRepayRate   = (r)   => send({ action: 'update_settings', loan_repay_rate: r })
   const handleSettings    = (s)   => send({ action: 'update_settings', ...s })
 
@@ -64,6 +66,7 @@ export default function PortfolioCard({ portfolio, onDelete }) {
             portfolioId={portfolio.id}
             token={token}
             onSell={handleSell}
+            onRemove={handleRemoveHouse}
             onBuy={handleBuy}
             cash={state?.cash}
             reserved={state?.reserved}
@@ -73,8 +76,9 @@ export default function PortfolioCard({ portfolio, onDelete }) {
         <div className="pl-6">
           <LoanList
             loans={state?.loans ?? []}
-            loanRepayRate={state?.loan_repay_rate ?? 1}
+            loanRepayRate={state?.loan_repay_rate ?? 0}
             onRepayRateChange={handleRepayRate}
+            onRemove={handleRemoveLoan}
           />
         </div>
       </div>

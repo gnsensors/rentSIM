@@ -1,13 +1,16 @@
 const fmt = (n) => '$' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 })
 
-function LoanCard({ loan }) {
+function LoanCard({ loan, onRemove }) {
   const pctPaid = ((loan.original - loan.amount) / loan.original * 100).toFixed(0)
 
   return (
     <div className="bg-gray-800 rounded-xl p-4 space-y-2 border border-gray-700">
       <div className="flex justify-between items-start">
         <span className="text-xs text-gray-400 font-medium">Loan #{loan.id}</span>
+        <div className="flex items-center gap-2">
         <span className="text-xs text-gray-400">{(loan.rate * 100).toFixed(1)}% — {loan.years}yr</span>
+        <button onClick={() => onRemove(loan.id)} className="text-xs text-gray-600 hover:text-red-400 transition-colors">Remove</button>
+      </div>
       </div>
 
       <div className="flex justify-between">
@@ -32,7 +35,7 @@ function LoanCard({ loan }) {
   )
 }
 
-export default function LoanList({ loans = [], loanRepayRate, onRepayRateChange }) {
+export default function LoanList({ loans = [], loanRepayRate, onRepayRateChange, onRemove }) {
   const total = loans.reduce((s, l) => s + l.amount, 0)
 
   return (
@@ -50,7 +53,7 @@ export default function LoanList({ loans = [], loanRepayRate, onRepayRateChange 
 
       <div className="space-y-3">
         {[...loans].sort((a, b) => b.amount - a.amount).map(l => (
-          <LoanCard key={l.id} loan={l} />
+          <LoanCard key={l.id} loan={l} onRemove={onRemove} />
         ))}
       </div>
 

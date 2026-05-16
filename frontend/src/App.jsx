@@ -28,6 +28,7 @@ function Dashboard() {
   const { token, user, logout }         = useAuth()
   const navigate                        = useNavigate()
   const [portfolios, setPortfolios]     = useState([])
+  const [selectedId, setSelectedId]     = useState(null)
   const [loadError, setLoadError]       = useState('')
   const [newName, setNewName]           = useState('')
   const [creating, setCreating]         = useState(false)
@@ -39,7 +40,9 @@ function Dashboard() {
       const res = await apiFetch(`${API}/api/portfolios`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      setPortfolios(await res.json())
+      const data = await res.json()
+      setPortfolios(data)
+      setSelectedId(prev => prev ?? (data[0]?.id ?? null))
     } catch (e) {
       setLoadError(e.message)
     }
@@ -51,30 +54,39 @@ function Dashboard() {
     e.preventDefault()
     if (!newName.trim()) return
     setCreating(true)
-    const res = await fetch(`${API}/api/portfolios`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newName.trim(), life: 360 }),
-    })
-    if (res.ok) {
+    try {
+      const res = await apiFetch(`${API}/api/portfolios`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName.trim(), life: 360 }),
+      })
+      const created = await res.json()
+      setPortfolios(prev => [...prev, created])
+      setSelectedId(created.id)
       setNewName('')
-      load()
+    } finally {
+      setCreating(false)
     }
-    setCreating(false)
   }
 
   async function deletePortfolio(id) {
-    await fetch(`${API}/api/portfolios/${id}`, {
+    await apiFetch(`${API}/api/portfolios/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     })
-    setPortfolios(prev => prev.filter(p => p.id !== id))
+    setPortfolios(prev => {
+      const next = prev.filter(p => p.id !== id)
+      if (selectedId === id) setSelectedId(next[0]?.id ?? null)
+      return next
+    })
   }
 
   async function handleLogout() {
     await logout()
     navigate('/login')
   }
+
+  const selected = portfolios.find(p => p.id === selectedId) ?? null
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -89,23 +101,40 @@ function Dashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-8 py-8 space-y-8">
-        {/* Create portfolio */}
-        <form onSubmit={createPortfolio} className="flex gap-3">
-          <input
-            type="text"
-            placeholder="Portfolio name…"
-            value={newName}
-            onChange={e => setNewName(e.target.value)}
-            className="bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-accent w-72"
-          />
-          <button
-            type="submit" disabled={creating || !newName.trim()}
-            className="bg-accent hover:bg-indigo-500 disabled:opacity-40 text-white font-semibold rounded-lg px-5 py-2 transition-all"
-          >
-            Create portfolio
-          </button>
-        </form>
+      <main className="max-w-7xl mx-auto px-8 py-8 space-y-6">
+        {/* Portfolio tabs + create */}
+        <div className="flex items-end gap-4 border-b border-gray-800 pb-0">
+          <div className="flex gap-1 flex-1 overflow-x-auto">
+            {portfolios.map(p => (
+              <button
+                key={p.id}
+                onClick={() => setSelectedId(p.id)}
+                className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors
+                  ${selectedId === p.id
+                    ? 'border-accent text-white'
+                    : 'border-transparent text-gray-400 hover:text-gray-200'}`}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+
+          <form onSubmit={createPortfolio} className="flex gap-2 pb-2">
+            <input
+              type="text"
+              placeholder="New portfolio…"
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent w-48"
+            />
+            <button
+              type="submit" disabled={creating || !newName.trim()}
+              className="bg-accent hover:bg-indigo-500 disabled:opacity-40 text-white font-semibold rounded-lg px-4 py-1.5 text-sm transition-all"
+            >
+              + Create
+            </button>
+          </form>
+        </div>
 
         {loadError && (
           <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-3 text-red-300 text-sm">
@@ -120,9 +149,13 @@ function Dashboard() {
           </div>
         )}
 
-        {portfolios.map(p => (
-          <PortfolioCard key={p.id} portfolio={p} onDelete={() => deletePortfolio(p.id)} />
-        ))}
+        {selected && (
+          <PortfolioCard
+            key={selected.id}
+            portfolio={selected}
+            onDelete={() => deletePortfolio(selected.id)}
+          />
+        )}
       </main>
     </div>
   )

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 const fmt = (n) => '$' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 })
 const API = window.__API_URL__ || import.meta.env.VITE_API_URL || ''
 
-function HouseCard({ house, onSell }) {
+function HouseCard({ house, onSell, onRemove }) {
   const gain = ((house.value - house.price) / house.price * 100).toFixed(1)
 
   return (
@@ -12,12 +12,14 @@ function HouseCard({ house, onSell }) {
         <span className="text-xs text-gray-400 font-medium">
           {house.metadata?.market_label || `House #${house.id}`}
         </span>
-        <button
-          onClick={() => onSell(house.id)}
-          className="text-xs text-red-400 hover:text-red-300 transition-colors"
-        >
-          Sell
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => onSell(house.id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">
+            Sell
+          </button>
+          <button onClick={() => onRemove(house.id)} className="text-xs text-gray-500 hover:text-red-400 transition-colors">
+            Remove
+          </button>
+        </div>
       </div>
 
       <div className="flex justify-between">
@@ -96,7 +98,7 @@ function BuyModal({ portfolioId, token, onBuy, onClose }) {
   )
 }
 
-export default function HouseList({ houses = [], portfolioId, token, onSell, onBuy, cash, reserved }) {
+export default function HouseList({ houses = [], portfolioId, token, onSell, onRemove, onBuy, cash, reserved }) {
   const [showModal, setShowModal] = useState(false)
 
   return (
@@ -112,7 +114,7 @@ export default function HouseList({ houses = [], portfolioId, token, onSell, onB
 
       <div className="space-y-3">
         {houses.map(h => (
-          <HouseCard key={h.id} house={h} onSell={onSell} />
+          <HouseCard key={h.id} house={h} onSell={onSell} onRemove={onRemove} />
         ))}
       </div>
 

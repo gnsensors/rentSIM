@@ -54,7 +54,7 @@ def _load(db: Session, portfolio_id: int, user_id: int) -> tuple[PortfolioModel,
     return db_p, p
 
 
-def _save(db: Session, db_p: PortfolioModel, p: Portfolio):
+def _save(db: Session, db_p: PortfolioModel, p: Portfolio, tick: bool = False):
     db_p.cash                = p.cash
     db_p.invested            = p.invested
     db_p.reserved            = p.reserved
@@ -64,7 +64,8 @@ def _save(db: Session, db_p: PortfolioModel, p: Portfolio):
     db_p.auto_buy_threshold  = p.auto_buy_threshold
     db_p.next_house_id       = p._next_house_id
     db_p.next_loan_id        = p._next_loan_id
-    db_p.month              += 1
+    if tick:
+        db_p.month           += 1
 
     # Sync houses
     sim_ids = {h.id for h in p.houses}
@@ -133,7 +134,7 @@ async def ws_endpoint(websocket: WebSocket, portfolio_id: int, token: str = ""):
 
             if action == "step":
                 events = p.step_month(db_p.month + 1)
-                _save(db, db_p, p)
+                _save(db, db_p, p, tick=True)
                 for event in events:
                     await websocket.send_json(event)
 
@@ -170,6 +171,18 @@ async def ws_endpoint(websocket: WebSocket, portfolio_id: int, token: str = ""):
                     p.auto_buy_threshold = float(val) if val is not None else None
                 _save(db, db_p, p)
                 await websocket.send_json({"type": "settings_updated", "state": p.to_dict()})
+
+            elif action == "delete_house":
+                house_id = int(raw.get("house_id", 0))
+                p.houses = [h for h in p.houses if h.id != house_id]
+                _save(db, db_p, p)
+                await websocket.send_json({"type": "state_update", "state": p.to_dict()})
+
+            elif action == "delete_loan":
+                loan_id = int(raw.get("loan_id", 0))
+                p.loans = [l for l in p.loans if l.id != loan_id]
+                _save(db, db_p, p)
+                await websocket.send_json({"type": "state_update", "state": p.to_dict()})
 
             elif action == "get_state":
                 await websocket.send_json({"type": "state_update", "state": p.to_dict(), "month": db_p.month})
