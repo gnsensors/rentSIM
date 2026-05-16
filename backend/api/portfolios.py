@@ -4,11 +4,11 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..api.auth import get_current_user_from_header
-from ..database import get_db
-from ..models import Portfolio, User
-from ..schemas import GeneratedHouse, InvestRequest, PortfolioCreate, PortfolioResponse
-from ..sim.rent_estimator import get_rent
+from api.auth import get_current_user_from_header
+from database import get_db
+from models import Portfolio, User
+from schemas import GeneratedHouse, InvestRequest, PortfolioCreate, PortfolioResponse
+from sim.rent_estimator import get_rent
 
 router = APIRouter(prefix="/api/portfolios", tags=["portfolios"])
 

@@ -1,12 +1,12 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
-from .. import auth as auth_utils
-from ..database import SessionLocal
-from ..models import House as HouseModel, Loan as LoanModel, Portfolio as PortfolioModel, User
-from ..sim import Portfolio, World
-from ..sim.house import House
-from ..sim.loan import Loan
+import auth as auth_utils
+from database import SessionLocal
+from models import House as HouseModel, Loan as LoanModel, Portfolio as PortfolioModel, User
+from sim import Portfolio, World
+from sim.house import House
+from sim.loan import Loan
 
 router = APIRouter(tags=["websocket"])
 
