@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const fmt = (n) => '$' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 })
-const API = import.meta.env.VITE_API_URL || ''
+const API = window.__API_URL__ || import.meta.env.VITE_API_URL || ''
 
 function HouseCard({ house, onSell }) {
   const gain = ((house.value - house.price) / house.price * 100).toFixed(1)
@@ -59,7 +59,7 @@ function BuyModal({ portfolioId, token, onBuy, onClose }) {
     setLoading(false)
   }
 
-  useState(() => { load() }, [])
+  useEffect(() => { load() }, [])
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-40 p-4">
